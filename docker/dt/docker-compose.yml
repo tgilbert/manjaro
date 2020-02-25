@@ -1,0 +1,41 @@
+version: '3.7'
+services:
+  node:
+    build: docker/node
+    working_dir:  /application
+    user: node
+    environment:
+      - NODE_ENV=production
+      - PMA_HOST=mariadb
+#    command: npm start
+    command: "pm2 start dt.all.config.js --no-daemon"
+    volumes:
+        - './:/application'
+    ports:
+        - '3003:3003'
+        - '3030:3030'
+        - '3017:3017'
+        - '3018:3018'
+        - '3019:3019'
+    depends_on:
+      - mariadb
+    networks:
+      - db
+      - node
+  mariadb:
+    image: 'mariadb:10.4'
+    working_dir: /application
+    volumes:
+      - './data/mysqlSf:/var/lib/mysql'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: hapi
+      MYSQL_PASSWORD: hapi
+      MYSQL_DATABASE: hapi
+    ports:
+      - '3307:3306'
+    networks:
+      - db
+networks:
+  db: null
+  node: null

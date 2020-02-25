@@ -1,0 +1,38 @@
+version: '3.7'
+services:
+  webserver:
+    image: 'nginx:alpine'
+    working_dir: /application
+    volumes:
+      - '.:/application/'
+      - './nginx/nginx.conf:/etc/nginx/conf.d/default.conf'
+    ports:
+      - '8089:8089'
+    depends_on:
+      - php-fpm
+    network_mode: host
+  php-fpm:
+    build: php-fpm
+    user: '1000:1000'
+    working_dir: /application
+    volumes:
+      - './portail:/application/portail'
+      - './planning:/application/planning'
+      - './php-fpm/php-ini-overrides.ini:/etc/php5/fpm/conf.d/99-overrides.ini'
+    ports:
+      - '9000:9000'
+    network_mode: host
+    environment:
+      PHP_IDE_CONFIG: serverName=test-app
+  openldap:
+    image: dinkel/openldap:latest
+    environment:
+      SLAPD_DOMAIN: openldap.local
+      SLAPD_PASSWORD: poimlk
+    ports:
+      - '389:389'
+      - '636:636'
+    volumes:
+      - './data/ldap/lib:/var/lib/ldap'
+      - './data/ldap/backups:/var/backups'
+      - './data/ldap/restore:/var/restore'
